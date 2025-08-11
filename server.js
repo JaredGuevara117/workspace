@@ -19,6 +19,11 @@ mongoose.connect(process.env.MONGODB_URI)
 
 app.use(cors());
 app.use(express.json());
+app.use(cors({
+  origin: ['https://skills.amazon.com', 'https://*.amazon.com'],
+  methods: ['GET', 'POST', 'PUT'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use('/', auth);
 app.use('/users', users);
@@ -26,5 +31,15 @@ app.use('/sensor-data', sensorData);
 app.use('/login', login);
 app.use('/entorno', entorno);
 
+// Middleware para verificar que solo tu skill Alexa pueda acceder
+app.use('/alexa', (req, res, next) => {
+  // Verificación simple por IP o header personalizado
+  const secretHeader = req.get('X-Alexa-Secret');
+  if (secretHeader === process.env.ALEXA_SECRET) {
+    next();
+  } else {
+    res.status(403).json({ error: 'Acceso no autorizado' });
+  }
+});
 // Iniciar servidor
 app.listen(PORT, '0.0.0.0', () => console.log(`Servidor escuchando en puerto ${PORT}`));

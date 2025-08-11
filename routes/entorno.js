@@ -733,5 +733,18 @@ router.put('/toggle/:entornoId/usuario/:usuarioId', async (req, res) => {
   }
 });
 
+// routes/entorno.js
+router.get('/nombres-entornos/:usuarioId', async (req, res) => {
+  try {
+    const entornos = await Entorno.find({ 
+      usuario: req.params.usuarioId 
+    }, 'nombre');
+    
+    res.json(entornos.map(e => e.nombre));
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener entornos' });
+  }
+});
+
 
 module.exports = router; 
